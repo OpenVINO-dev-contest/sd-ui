@@ -1,0 +1,6 @@
+numpy
+openvino-dev==2023.0.0
+optimum
+optimum-intel[openvino,diffusers]
+gradio
+onnx>=1.11.0

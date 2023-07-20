@@ -14,3 +14,7 @@
 3. Run demo
 
     ```python3 sd-ui.py```
+
+4. Run optimized model
+
+    ```python3 sd-ui-optimized.py```

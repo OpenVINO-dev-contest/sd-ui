@@ -8,9 +8,9 @@ core = Core()
 available_devices = core.available_devices
 current_device = "CPU"
 
-model_id = "stabilityai/stable-diffusion-2-1-base"
+model_id = "OpenVINO/stable-diffusion-2-1-quantized"
 
-model_path = Path('ir_model')
+model_path = Path('ir_model_optimized')
 
 if model_path.exists():
     ov_pipe = OVStableDiffusionPipeline.from_pretrained(model_path,
@@ -23,7 +23,6 @@ if model_path.exists():
 else:
     ov_pipe = OVStableDiffusionPipeline.from_pretrained(model_id,
                                                         device=current_device,
-                                                        export=True,
                                                         compile=False)
     ov_pipe.reshape(batch_size=1,
                     height=512,
@@ -119,9 +118,6 @@ with gr.Blocks() as demo:
 
 if __name__ == "__main__":
     try:
-        demo.queue().launch(server_name="10.3.233.99",
-                            debug=True,
-                            share=False,
-                            height=800)
+        demo.queue().launch(share=False, height=800)
     except Exception:
-        demo.queue().launch(debug=True, share=True, height=800)
+        demo.queue().launch(share=True, height=800)

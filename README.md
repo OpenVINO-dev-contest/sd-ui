@@ -1,5 +1,8 @@
 # Demo for SD with UI
 
+<img width="855" alt="image" src="https://github.com/OpenVINO-dev-contest/sd-ui/assets/91237924/76dcf485-c7f1-4149-8d78-3636dc30527f">
+
+
 1. Create a Virtual Environment 
 
     ```python3 -m venv openvino_env```

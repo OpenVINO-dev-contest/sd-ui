@@ -47,7 +47,8 @@ def generate_from_text(text,
 
 
 def select_device(device_str: str,
-                  current_text: str = "",
+                  current_text: str,
+                  current_negative_text: str,
                   progress: gr.Progress = gr.Progress()):
     if device_str != ov_pipe._device:
         ov_pipe.to(device_str)
@@ -55,7 +56,7 @@ def select_device(device_str: str,
         for i in progress.tqdm(range(1),
                                desc=f"Model loading on {device_str}"):
             ov_pipe.compile()
-    return current_text
+    return current_text, current_negative_text
 
 
 def reset(response, perf):
@@ -114,7 +115,7 @@ with gr.Blocks() as demo:
                         [model_output, performance])
     button_clear.click(reset, [model_output, performance],
                        [model_output, performance])
-    device.change(select_device, [device, text], [text])
+    device.change(select_device, [device, text, negative_text], [text, negative_text])
 
 if __name__ == "__main__":
     try:

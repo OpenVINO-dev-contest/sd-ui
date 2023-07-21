@@ -15,6 +15,14 @@
 
     ```python3 sd-ui.py```
 
-4. Run optimized model
+4. Run optimized model (optional)
 
     ```python3 sd-ui-optimized.py```
+
+5. Run in hyper language mode (optional)
+
+    ```cd ./hyper-language```
+
+    ```python3 export.py```
+
+    ```python3 sd-ui-hyper.py```

@@ -8,29 +8,26 @@ core = Core()
 available_devices = core.available_devices
 current_device = "CPU"
 
-model_id = "stabilityai/stable-diffusion-2-1-base"
+available_language = ["English", "中文"]
+current_language = "English"
 
-model_path = Path('ir_model')
+model_path = Path('../ir_model')
+cn_model_path = Path('../ir_model_cn')
 
-if model_path.exists():
-    ov_pipe = OVStableDiffusionPipeline.from_pretrained(model_path,
-                                                        device=current_device,
-                                                        compile=False)
-    ov_pipe.reshape(batch_size=1,
-                    height=512,
-                    width=512,
-                    num_images_per_prompt=1)
-else:
-    ov_pipe = OVStableDiffusionPipeline.from_pretrained(model_id,
-                                                        device=current_device,
-                                                        export=True,
-                                                        compile=False)
-    ov_pipe.reshape(batch_size=1,
-                    height=512,
-                    width=512,
-                    num_images_per_prompt=1)
-    ov_pipe.save_pretrained(model_path)
+example_text = ["red car in snowy forest", "机械狗"]
+example_negative_text = ["low quality, ugly, deformed, blur", "不清晰的"]
+available_model_path = [model_path, cn_model_path]
+
+model_language_dict = dict(zip(available_language, available_model_path))
+text_dict = dict(zip(available_language, example_text))
+negative_text_dict = dict(zip(available_language, example_negative_text))
+
+ov_pipe = OVStableDiffusionPipeline.from_pretrained(available_model_path[0],
+                                                    device=current_device,
+                                                    compile=False)
+ov_pipe.reshape(batch_size=1, height=512, width=512, num_images_per_prompt=1)
 ov_pipe.compile()
+
 
 def generate_from_text(text,
                        negative_text,
@@ -48,8 +45,8 @@ def generate_from_text(text,
 
 
 def select_device(device_str: str,
-                  current_text: str,
-                  current_negative_text: str,
+                 current_text: str,
+                 current_negative_text: str,
                   progress: gr.Progress = gr.Progress()):
     if device_str != ov_pipe._device:
         ov_pipe.to(device_str)
@@ -57,6 +54,30 @@ def select_device(device_str: str,
         for i in progress.tqdm(range(1),
                                desc=f"Model loading on {device_str}"):
             ov_pipe.compile()
+    return current_text, current_negative_text
+
+
+def select_model(language_str: str,
+                 device_str: str,
+                 current_text: str,
+                 current_negative_text: str,
+                 progress: gr.Progress = gr.Progress()):
+    global current_language
+    global ov_pipe
+    if language_str != current_language:
+        current_text = text_dict[language_str]
+        current_negative_text = negative_text_dict[language_str]
+        ov_pipe = OVStableDiffusionPipeline.from_pretrained(
+            model_language_dict[language_str],
+            device=device_str,
+            compile=False)
+        ov_pipe.reshape(batch_size=1,
+                        height=512,
+                        width=512,
+                        num_images_per_prompt=1)
+        for i in progress.tqdm(range(1), desc=f"Loading {language_str} model"):
+            ov_pipe.compile()
+            current_language = language_str
     return current_text, current_negative_text
 
 
@@ -69,7 +90,12 @@ examples = [
     "A pikachu fine dining with a view to the Eiffel Tower",
     "A mecha robot in a favela in expressionist style",
     "an insect robot preparing a delicious meal",
-    "A small cabin on top of a snowy mountain in the style of Disney, artstation"
+    "A small cabin on top of a snowy mountain in the style of Disney, artstation",
+    "城堡 大海 夕阳 宫崎骏动画",
+    "花落知多少",
+    "小桥流水人家",
+    "飞流直下三千尺，油画",
+    "中国海边城市，科幻，未来感，唯美，插画。"
 ]
 
 with gr.Blocks() as demo:
@@ -77,11 +103,9 @@ with gr.Blocks() as demo:
 
     with gr.Row():
         with gr.Column(scale=2):
-            text = gr.Textbox(value="red car in snowy forest",
-                              label="Enter your prompt")
-            negative_text = gr.Textbox(
-                value="low quality, ugly, deformed, blur",
-                label="Enter a negative prompt")
+            text = gr.Textbox(value=example_text[0], label="Enter your prompt")
+            negative_text = gr.Textbox(value=example_negative_text[0],
+                                       label="Enter a negative prompt")
             model_output = gr.Image(label="Result", type="pil", height=512)
             performance = gr.Textbox(label="Performance",
                                      lines=1,
@@ -91,6 +115,9 @@ with gr.Blocks() as demo:
                 button_clear = gr.Button(value="Clear")
 
         with gr.Column(scale=1):
+            language = gr.Dropdown(choices=available_language,
+                                   value=current_language,
+                                   label="Model language")
             device = gr.Dropdown(choices=available_devices,
                                  value=current_device,
                                  label="Device")
@@ -117,6 +144,8 @@ with gr.Blocks() as demo:
     button_clear.click(reset, [model_output, performance],
                        [model_output, performance])
     device.change(select_device, [device, text, negative_text], [text, negative_text])
+    language.change(select_model, [language, device, text, negative_text],
+                    [text, negative_text])
 
 if __name__ == "__main__":
     try:

@@ -1,6 +1,6 @@
 # Demo for SD with UI
 
-<img width="855" alt="image" src="https://github.com/OpenVINO-dev-contest/sd-ui/assets/91237924/76dcf485-c7f1-4149-8d78-3636dc30527f">
+<img width="1018" alt="image" src="https://github.com/OpenVINO-dev-contest/sd-ui/assets/91237924/9c2945ff-695b-4347-b148-6c04e736152b">
 
 
 1. Create a Virtual Environment 

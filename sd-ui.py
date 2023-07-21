@@ -30,7 +30,7 @@ else:
                     width=512,
                     num_images_per_prompt=1)
     ov_pipe.save_pretrained(model_path)
-
+ov_pipe.compile()
 
 def generate_from_text(text,
                        negative_text,

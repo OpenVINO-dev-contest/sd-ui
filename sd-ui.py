@@ -120,8 +120,7 @@ with gr.Blocks() as demo:
 
 if __name__ == "__main__":
     try:
-        demo.queue().launch(server_name="10.3.233.99",
-                            debug=True,
+        demo.queue().launch(debug=True,
                             share=False,
                             height=800)
     except Exception:

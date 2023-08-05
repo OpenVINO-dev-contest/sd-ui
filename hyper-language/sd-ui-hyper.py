@@ -110,8 +110,8 @@ with gr.Blocks() as demo:
             performance = gr.Textbox(label="Performance",
                                      lines=1,
                                      interactive=False)
-            with gr.Column(scale=1):
-                button_submit = gr.Button(value="Generate image")
+            with gr.Row(scale=1):
+                button_submit = gr.Button(value='Submit', variant='primary')
                 button_clear = gr.Button(value="Clear")
 
         with gr.Column(scale=1):
